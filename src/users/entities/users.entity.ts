@@ -1,4 +1,4 @@
-import { Entity, Column, BeforeInsert } from 'typeorm';
+import { Entity, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { CoreEntity } from 'src/common/entities/core.entity';
 import {
   ObjectType,
@@ -13,7 +13,7 @@ import { IsString, IsEnum } from 'class-validator';
 // type UserRole = 'client' | 'owner' | 'delivery';
 enum UserRole {
   Client,
-  Ownwer,
+  Owner,
   Delivery,
 }
 registerEnumType(UserRole, { name: 'UserRole' });
@@ -37,7 +37,12 @@ export class User extends CoreEntity {
   @IsEnum(UserRole)
   role: UserRole;
 
+  @Column({ default: false })
+  @Field(() => Boolean)
+  verified: boolean;
+
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword(): Promise<void> {
     try {
       this.password = await bcrypt.hash(this.password, 10);
